@@ -1,6 +1,5 @@
 #include<iostream>
 #include<vector>
-#include<ctime>
 #include<iterator>
 #include<chrono>
 
@@ -19,16 +18,9 @@ void swap(int* a, int* b)
     *b = tmp;
 }
 
-void swap1(vector<int>::iterator& begin, vector<int>::iterator& end)
+stats bubble_sort(vector<int>& arr)
 {
-    auto tmp = begin;
-    begin = end;
-    end = tmp;
-}
-
-
-vector<int>& bubble_sort(vector<int>& arr, stats& st)
-{
+    stats st;
     for (int i = 0; i < arr.size() - 1; ++i)
     {
         bool flag = true;
@@ -44,11 +36,12 @@ vector<int>& bubble_sort(vector<int>& arr, stats& st)
         }
         if (flag) break;
     }
-    return arr;
+    return st;
 }
 
-vector<int>::iterator bubble_sort_iter(vector<int>::iterator begin, vector<int>::iterator end, stats& st)
+stats bubble_sort_iter(vector<int>::iterator& begin, vector<int>::iterator& end)
 {
+    stats st;
     for (auto i = begin; i != end - 1; ++i)
     {
         bool flag = true;
@@ -64,10 +57,55 @@ vector<int>::iterator bubble_sort_iter(vector<int>::iterator begin, vector<int>:
         }
         if (flag) break;
     }
-    return begin;
+    return st;
 }
 
+stats shell_sort(vector<int>& arr)
+{
+    stats st;
+    for (int gap = arr.size() / 2; gap > 0; gap /= 2)
+    {
+        for (int i = gap; i < arr.size(); i += 1)
+        {
+            int tmp = arr[i];
+            st.copy_count++;
+            int j;
+            st.comparison_count++;
+            for (j = i; j >= gap && arr[j - gap] > tmp; j -= gap)
+            {
+                st.comparison_count++;
+                arr[j] = arr[j - gap];
+                st.copy_count++;
+            }
+            arr[j] = tmp;
+        }
+    }
+    return st;
+}
 
+stats shell_sort_iter(vector<int>::iterator begin, vector<int>::iterator end)
+{
+    stats st;
+    int size = distance(begin, end);
+    for (int gap = size / 2; gap > 0; gap /= 2)
+    {
+        for (int i = gap; i < size; i++)
+        {
+            auto tmp = *(begin + i);
+            st.copy_count++;
+            int j;
+            st.comparison_count++;
+            for (j = i; j >= gap && *(begin + j - gap) > tmp; j -= gap)
+            {
+                st.comparison_count++;
+                *(begin + j) = *(begin + j - gap);
+                st.copy_count++;
+            }
+            *(begin + j) = tmp;
+        }
+    }
+    return st;
+}
 
 size_t lcg()
 {
@@ -78,45 +116,104 @@ size_t lcg()
 
 int main()
 {
-    stats st;
+    stats st, st1, st2;
 	vector<int> arr, arr1;
     double seconds = 0;
 
-    /*clock_t start = clock();
-    for (size_t i = 0; i < 3; ++i)
-    {
-        vector<int> arr;
-        arr.reserve(10000);
-        for (size_t j = 0; j < 10000; ++j)
-        {
-            arr.push_back(lcg());
-        }
-        vector<int>::iterator it_begin = arr.begin();
-        vector<int>::iterator it_end = arr.end();
-        it_begin = bubble_sort_iter(it_begin, it_end, st);
-    }
-    clock_t end = clock();
-    seconds += (double)(end - start) / CLOCKS_PER_SEC;
+    //int n = 5;
+    //clock_t start = clock();
+    //for (size_t i = 0; i < n; ++i)
+    //{
+    //    vector<int> arr;
+    //    arr.reserve(10000);
+    //    for (size_t j = 0; j < 10000; ++j)
+    //    {
+    //        arr.push_back(lcg());
+    //    }
+    //    vector<int>::iterator it_begin = arr.begin();
+    //    vector<int>::iterator it_end = arr.end();
+    //    it_begin = shell_sort_iter(it_begin, it_end, st);
+    //}
+    //clock_t end = clock();
+    //seconds += (double)(end - start) / CLOCKS_PER_SEC;
 
-    cout << "TIME: " << seconds << endl << "AVERAGE TIME: " << seconds / 100 << endl << "COMPARISON: " << st.comparison_count / 100 << endl << "COPY: " << st.copy_count / 100 << endl;*/
+    //cout << "TIME: " << seconds << endl << "AVERAGE TIME: " << seconds / n << endl << "COMPARISON: " << st.comparison_count / n << endl << "COPY: " << st.copy_count / n << endl;
 
-    chrono::time_point<std::chrono::system_clock> start, end;
+    //cout << endl << endl;
 
-    start = chrono::system_clock::now();
-    for (size_t i = 0; i < 5; ++i)
-    {
-        vector<int> arr;
-        arr.reserve(10000);
-        for (size_t j = 0; j < 10000; ++j)
-        {
-            arr.push_back(lcg());
-        }
-        arr = bubble_sort(arr, st);
-    }
-    end = chrono::system_clock::now();
-    chrono::duration<double> elapsed_seconds = end - start;
 
-    cout << "TIME: " << elapsed_seconds.count() << endl << "AVERAGE TIME: " << elapsed_seconds.count() / 5 << endl << "COMPARISON: " << st.comparison_count / 100 << endl << "COPY: " << st.copy_count / 100 << endl;
+    //chrono::time_point<std::chrono::system_clock> start, end;
+
+    //start = chrono::system_clock::now();
+    //for (size_t i = 0; i < n; ++i)
+    //{
+    //    vector<int> arr;
+    //    arr.reserve(10000);
+    //    for (size_t j = 0; j < 10000; ++j)
+    //    {
+    //        arr.push_back(lcg());
+    //    }
+    //    arr = shell_sort(arr, st);
+    //}
+    //end = chrono::system_clock::now();
+    //chrono::duration<double> elapsed_seconds = end - start;
+
+    //cout << "TIME: " << elapsed_seconds.count() << endl << "AVERAGE TIME: " << elapsed_seconds.count() / n << endl << "COMPARISON: " << st.comparison_count / n << endl << "COPY: " << st.copy_count / n << endl;
+    //cout << endl << endl;
+
+    //start = chrono::system_clock::now();
+    //for (size_t i = 0; i < n; ++i)
+    //{
+    //    vector<int> arr;
+    //    arr.reserve(10000);
+    //    for (size_t j = 0; j < 10000; ++j)
+    //    {
+    //        arr.push_back(lcg());
+    //    }
+    //    vector<int>::iterator it_begin = arr.begin();
+    //    vector<int>::iterator it_end = arr.end();
+    //    it_begin = shell_sort_iter(it_begin, it_end, st1);
+    //}
+    //end = chrono::system_clock::now();
+    //chrono::duration<double> elapsed_seconds1 = end - start;
+
+    //cout << "TIME: " << elapsed_seconds1.count() << endl << "AVERAGE TIME: " << elapsed_seconds1.count() / n << endl << "COMPARISON: " << st1.comparison_count / n << endl << "COPY: " << st1.copy_count / n << endl;
+    //cout << endl << endl;
+
+    //start = chrono::system_clock::now();
+    //for (size_t i = 0; i < n; ++i)
+    //{
+    //    vector<int> arr;
+    //    arr.reserve(10000);
+    //    for (size_t j = 0; j < 10000; ++j)
+    //    {
+    //        arr.push_back(lcg());
+    //    }
+    //    st2 = shell_sorting(arr);
+    //}
+    //end = chrono::system_clock::now();
+    //chrono::duration<double> elapsed_seconds2 = end - start;
+
+    //cout << "TIME: " << elapsed_seconds2.count() << endl << "AVERAGE TIME: " << elapsed_seconds2.count() / n << endl << "COMPARISON: " << st2.comparison_count / n << endl << "COPY: " << st2.copy_count / n << endl;
+    //cout << endl << endl;
+
+    //arr = { 9, 7, 3, 2, 5, 6, 1, 10, 4, 8 };
+    //arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    //arr = { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
+    //stats stt;
+    //stt = shell_sort(arr);
+    //stt = bubble_sort(arr);
+    //cout << "COMPARISON: " << stt.comparison_count << endl << "COPY: " << stt.copy_count << endl;
+    //arr = shell_sort(arr, st);
+
+    //vector<int>::iterator it_begin = arr.begin();
+    //vector<int>::iterator it_end = arr.end();
+    //it_begin = shell_sort_iter(it_begin, it_end, st);
+
+    //for (auto& i : arr)
+    //{
+    //    cout << i << endl;
+    //}
 
 	return 0;
 }
