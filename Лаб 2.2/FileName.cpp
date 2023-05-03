@@ -2,6 +2,7 @@
 #include<vector>
 #include<iterator>
 #include<chrono>
+#include<string>
 
 using namespace std;
 
@@ -65,7 +66,7 @@ stats shell_sort(vector<int>& arr)
     stats st;
     for (int gap = arr.size() / 2; gap > 0; gap /= 2)
     {
-        for (int i = gap; i < arr.size(); i += 1)
+        for (int i = gap; i < arr.size(); i++)
         {
             int tmp = arr[i];
             st.copy_count++;
@@ -86,7 +87,7 @@ stats shell_sort(vector<int>& arr)
 stats shell_sort_iter(vector<int>::iterator begin, vector<int>::iterator end)
 {
     stats st;
-    int size = distance(begin, end);
+    size_t size = distance(begin, end);
     for (int gap = size / 2; gap > 0; gap /= 2)
     {
         for (int i = gap; i < size; i++)
@@ -107,6 +108,99 @@ stats shell_sort_iter(vector<int>::iterator begin, vector<int>::iterator end)
     return st;
 }
 
+void generate_heap(vector<int>& arr, size_t i, size_t size, stats& st)
+{
+    size_t largest = i;
+    size_t left = 2 * i + 1;
+    size_t right = 2 * i + 2;
+
+    st.comparison_count++;
+    if (left < size && arr[left] > arr[largest])
+    {
+        largest = left;
+        st.copy_count++;
+    }
+
+    st.comparison_count++;
+    if (right < size && arr[right] > arr[largest])
+    {
+        largest = right;
+        st.copy_count++;
+    }
+
+    st.comparison_count++;
+    if (largest != i)
+    {
+        swap(arr[i], arr[largest]);
+        st.copy_count++;
+        generate_heap(arr, largest, size, st);
+    }
+}
+
+stats heap_sort(vector<int>& arr)
+{
+    stats st;
+    for (int i = arr.size() / 2 - 1; i >= 0; i--)
+    {
+        generate_heap(arr, i, arr.size(), st);
+    }
+
+    for (int i = arr.size() - 1; i >= 0; i--)
+    {
+        swap(arr[0], arr[i]);
+        st.copy_count++;
+        generate_heap(arr, 0, i, st);
+    }
+    return st;
+}
+
+void generate_heap(vector<int>::iterator begin, size_t i, size_t size, stats& st)
+{
+    size_t largest = i;
+    size_t left = 2 * i + 1;
+    size_t right = 2 * i + 2;
+
+    st.comparison_count++;
+    if (left < size && *(begin + left) > *(begin + largest))
+    {
+        largest = left;
+        st.copy_count++;
+    }
+
+    st.comparison_count++;
+    if (right < size && *(begin + right) > *(begin + largest))
+    {
+        largest = right;
+        st.copy_count++;
+    }
+
+    st.comparison_count++;
+    if (largest != i)
+    {
+        swap(*(begin + i), *(begin + largest));
+        st.copy_count++;
+        generate_heap(begin, largest, size, st);
+    }
+}
+
+stats heap_sort_iter(vector<int>::iterator& begin, vector<int>::iterator& end)
+{
+    size_t size = distance(begin, end);
+    stats st;
+    for (int i = size / 2 - 1; i >= 0; i--)
+    {
+        generate_heap(begin, i, size, st);
+    }
+
+    for (int i = size - 1; i >= 0; i--)
+    {
+        swap(*begin, *(begin + i));
+        st.copy_count++;
+        generate_heap(begin, 0, i, st);
+    }
+    return st;
+}
+
 size_t lcg()
 {
     static size_t x = 0;
@@ -119,101 +213,75 @@ int main()
     stats st, st1, st2;
 	vector<int> arr, arr1;
     double seconds = 0;
+    size_t compare = 0, copy = 0;
+    int n = 1000;
 
-    //int n = 5;
-    //clock_t start = clock();
-    //for (size_t i = 0; i < n; ++i)
-    //{
-    //    vector<int> arr;
-    //    arr.reserve(10000);
-    //    for (size_t j = 0; j < 10000; ++j)
-    //    {
-    //        arr.push_back(lcg());
-    //    }
-    //    vector<int>::iterator it_begin = arr.begin();
-    //    vector<int>::iterator it_end = arr.end();
-    //    it_begin = shell_sort_iter(it_begin, it_end, st);
-    //}
-    //clock_t end = clock();
-    //seconds += (double)(end - start) / CLOCKS_PER_SEC;
+    chrono::time_point<std::chrono::system_clock> start, end;
 
-    //cout << "TIME: " << seconds << endl << "AVERAGE TIME: " << seconds / n << endl << "COMPARISON: " << st.comparison_count / n << endl << "COPY: " << st.copy_count / n << endl;
+    for (size_t i = 0; i < 100; ++i)
+    {
+        vector<int> arr;
+        arr.reserve(n);
+        for (size_t j = 0; j < n; ++j)
+        {
+            arr.push_back(lcg());
+        }
+        start = chrono::system_clock::now();
+        st = shell_sort(arr);
+        end = chrono::system_clock::now();
+        chrono::duration<double> elapsed_seconds = end - start;
 
-    //cout << endl << endl;
-
+        copy += st.copy_count;
+        compare += st.comparison_count;
+        seconds += elapsed_seconds.count();
+    }
+ 
+    cout << "TIME: " << seconds << endl << "AVERAGE TIME: " << seconds / 100 << endl << "COMPARISON: " << compare / 100 << endl << "COPY: " << copy / 100 << endl;
+    cout << endl << endl;
 
     //chrono::time_point<std::chrono::system_clock> start, end;
 
-    //start = chrono::system_clock::now();
     //for (size_t i = 0; i < n; ++i)
     //{
     //    vector<int> arr;
-    //    arr.reserve(10000);
-    //    for (size_t j = 0; j < 10000; ++j)
-    //    {
-    //        arr.push_back(lcg());
-    //    }
-    //    arr = shell_sort(arr, st);
-    //}
-    //end = chrono::system_clock::now();
-    //chrono::duration<double> elapsed_seconds = end - start;
-
-    //cout << "TIME: " << elapsed_seconds.count() << endl << "AVERAGE TIME: " << elapsed_seconds.count() / n << endl << "COMPARISON: " << st.comparison_count / n << endl << "COPY: " << st.copy_count / n << endl;
-    //cout << endl << endl;
-
-    //start = chrono::system_clock::now();
-    //for (size_t i = 0; i < n; ++i)
-    //{
-    //    vector<int> arr;
-    //    arr.reserve(10000);
-    //    for (size_t j = 0; j < 10000; ++j)
+    //    arr.reserve(100000);
+    //    for (size_t j = 0; j < 100000; ++j)
     //    {
     //        arr.push_back(lcg());
     //    }
     //    vector<int>::iterator it_begin = arr.begin();
     //    vector<int>::iterator it_end = arr.end();
-    //    it_begin = shell_sort_iter(it_begin, it_end, st1);
+    //    start = chrono::system_clock::now();
+    //    st = shell_sort_iter(it_begin, it_end);
+    //    end = chrono::system_clock::now();
+    //    chrono::duration<double> elapsed_seconds = end - start;
+    //    seconds += elapsed_seconds.count();
     //}
-    //end = chrono::system_clock::now();
-    //chrono::duration<double> elapsed_seconds1 = end - start;
 
-    //cout << "TIME: " << elapsed_seconds1.count() << endl << "AVERAGE TIME: " << elapsed_seconds1.count() / n << endl << "COMPARISON: " << st1.comparison_count / n << endl << "COPY: " << st1.copy_count / n << endl;
-    //cout << endl << endl;
-
-    //start = chrono::system_clock::now();
-    //for (size_t i = 0; i < n; ++i)
-    //{
-    //    vector<int> arr;
-    //    arr.reserve(10000);
-    //    for (size_t j = 0; j < 10000; ++j)
-    //    {
-    //        arr.push_back(lcg());
-    //    }
-    //    st2 = shell_sorting(arr);
-    //}
-    //end = chrono::system_clock::now();
-    //chrono::duration<double> elapsed_seconds2 = end - start;
-
-    //cout << "TIME: " << elapsed_seconds2.count() << endl << "AVERAGE TIME: " << elapsed_seconds2.count() / n << endl << "COMPARISON: " << st2.comparison_count / n << endl << "COPY: " << st2.copy_count / n << endl;
+    //cout << "TIME: " << seconds << endl << "AVERAGE TIME: " << seconds / n << endl << "COMPARISON: " << st.comparison_count / n << endl << "COPY: " << st.copy_count / n << endl;
     //cout << endl << endl;
 
     //arr = { 9, 7, 3, 2, 5, 6, 1, 10, 4, 8 };
     //arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     //arr = { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
     //stats stt;
+
     //stt = shell_sort(arr);
     //stt = bubble_sort(arr);
-    //cout << "COMPARISON: " << stt.comparison_count << endl << "COPY: " << stt.copy_count << endl;
-    //arr = shell_sort(arr, st);
+    //stt = heap_sort(arr);
 
     //vector<int>::iterator it_begin = arr.begin();
     //vector<int>::iterator it_end = arr.end();
-    //it_begin = shell_sort_iter(it_begin, it_end, st);
 
-    //for (auto& i : arr)
-    //{
-    //    cout << i << endl;
-    //}
+    //stt = shell_sort_iter(it_begin, it_end);
+    //stt = bubble_sort_iter(it_begin, it_end);
+    //stt = heap_sort_iter(it_begin, it_end);
+
+    /*cout << "COMPARISON: " << stt.comparison_count << endl << "COPY: " << stt.copy_count << endl;
+    for (auto& i : arr)
+    {
+        cout << i << endl;
+    }*/
 
 	return 0;
 }
