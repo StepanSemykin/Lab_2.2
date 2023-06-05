@@ -30,30 +30,6 @@ private:
     };
     vector<Data> group;
 
-    void generate_heap(size_t i, size_t size)
-    {
-        size_t largest = i;
-        size_t left = 2 * i + 1;
-        size_t right = 2 * i + 2;
-
-        if (left < size && group[left] > group[largest])
-        {
-            largest = left;
-        }
-
-        if (right < size && group[right] > group[largest])
-        {
-            largest = right;
-        }
-
-        if (largest != i)
-        {
-            Data tmp = group[i];
-            group[i] = group[largest];
-            group[largest] = tmp;
-            generate_heap(largest, size);
-        }
-    }
 public:
     Students() = default;
 
@@ -85,148 +61,19 @@ public:
         else return d1.last_name > d2.last_name;
     }
 
-    void bubble_sort()
+    Data& operator [] (int index)
     {
-        for (int i = 0; i < group.size() - 1; ++i)
-        {
-            bool flag = true;
-            for (int j = 0; j < group.size() - i - 1; ++j)
-            {
-                if (group[j] > group[j + 1])
-                {
-                    flag = false;
-                    Data tmp = group[j];
-                    group[j] = group[j + 1];
-                    group[j + 1] = tmp;
-                }
-            }
-            if (flag) break;
-        }
+        return group[index];
     }
 
-    void shell_sort()
+    int size()
     {
-        for (int gap = group.size() / 2; gap > 0; gap /= 2)
-        {
-            for (int i = gap; i < group.size(); i++)
-            {
-                auto tmp = group[i];
-                int j;
-                for (j = i; j >= gap && group[j - gap] > tmp; j -= gap)
-                {
-                    group[j] = group[j - gap];
-                }
-               group[j] = tmp;
-            }
-        }
-    }
-
-    void heap_sort()
-    {
-        for (int i = group.size() / 2 - 1; i >= 0; i--)
-        {
-            generate_heap(i, group.size());
-        }
-
-        for (int i = group.size() - 1; i >= 0; i--)
-        {
-            Data tmp = group[0];
-            group[0] = group[i];
-            group[i] = tmp;
-            generate_heap(0, i);
-        }
+        return group.size();
     }
 };
 
-stats bubble_sort(string& str) // сортировка строк
-{
-    stats st;
-    for (int i = 0; i < str.size() - 1; ++i)
-    {
-        bool flag = true;
-        for (int j = 0; j < str.size() - i - 1; ++j)
-        {
-            st.comparison_count++;
-            if (str[j] > str[j + 1])
-            {
-                flag = false;
-                swap(str[j], str[j + 1]);
-                st.copy_count++;
-            }
-        }
-        if (flag) break;
-    }
-    return st;
-}
-
-stats shell_sort(string& str) // сортировка строк
-{
-    stats st;
-    for (int gap = str.size() / 2; gap > 0; gap /= 2)
-    {
-        for (int i = gap; i < str.size(); i++)
-        {
-            int tmp = str[i];
-            st.copy_count++;
-            int j;
-            st.comparison_count++;
-            for (j = i; j >= gap && str[j - gap] > tmp; j -= gap)
-            {
-                st.comparison_count++;
-                str[j] = str[j - gap];
-                st.copy_count++;
-            }
-            str[j] = tmp;
-        }
-    }
-    return st;
-}
-
-void generate_heap(string& str, size_t i, size_t size, stats& st) // сортировка строк
-{
-    size_t largest = i;
-    size_t left = 2 * i + 1;
-    size_t right = 2 * i + 2;
-
-    st.comparison_count++;
-    if (left < size && str[left] > str[largest])
-    {
-        largest = left;
-    }
-
-    st.comparison_count++;
-    if (right < size && str[right] > str[largest])
-    {
-        largest = right;
-    }
-
-    st.comparison_count++;
-    if (largest != i)
-    {
-        swap(str[i], str[largest]);
-        st.copy_count++;
-        generate_heap(str, largest, size, st);
-    }
-}
-
-stats heap_sort(string& str) // сортировка строк
-{
-    stats st;
-    for (int i = str.size() / 2 - 1; i >= 0; i--)
-    {
-        generate_heap(str, i, str.size(), st);
-    }
-
-    for (int i = str.size() - 1; i >= 0; i--)
-    {
-        swap(str[0], str[i]);
-        st.copy_count++;
-        generate_heap(str, 0, i, st);
-    }
-    return st;
-}
-
-stats bubble_sort(vector<int>& arr)
+template <typename T>
+stats bubble_sort(T& arr)
 {
     stats st;
     for (int i = 0; i < arr.size() - 1; ++i)
@@ -247,35 +94,15 @@ stats bubble_sort(vector<int>& arr)
     return st;
 }
 
-stats bubble_sort_iter(vector<int>::iterator& begin, vector<int>::iterator& end)
-{
-    stats st;
-    for (auto i = begin; i != end - 1; ++i)
-    {
-        bool flag = true;
-        for (auto j = begin; j != end - 1; ++j)
-        {
-            st.comparison_count++;
-            if (*j > *(j + 1))
-            {
-                flag = false;
-                swap(*j, *(j + 1));
-                st.copy_count++;
-            }
-        }
-        if (flag) break;
-    }
-    return st;
-}
-
-stats shell_sort(vector<int>& arr)
+template <typename T>
+stats shell_sort(T& arr)
 {
     stats st;
     for (int gap = arr.size() / 2; gap > 0; gap /= 2)
     {
         for (int i = gap; i < arr.size(); i++)
         {
-            int tmp = arr[i];
+            auto tmp = arr[i];
             st.copy_count++;
             int j;
             st.comparison_count++;
@@ -291,31 +118,8 @@ stats shell_sort(vector<int>& arr)
     return st;
 }
 
-stats shell_sort_iter(vector<int>::iterator begin, vector<int>::iterator end)
-{
-    stats st;
-    size_t size = distance(begin, end);
-    for (int gap = size / 2; gap > 0; gap /= 2)
-    {
-        for (int i = gap; i < size; i++)
-        {
-            auto tmp = *(begin + i);
-            st.copy_count++;
-            int j;
-            st.comparison_count++;
-            for (j = i; j >= gap && *(begin + j - gap) > tmp; j -= gap)
-            {
-                st.comparison_count++;
-                *(begin + j) = *(begin + j - gap);
-                st.copy_count++;
-            }
-            *(begin + j) = tmp;
-        }
-    }
-    return st;
-}
-
-void generate_heap(vector<int>& arr, size_t i, size_t size, stats& st)
+template <typename T>
+void generate_heap(T& arr, size_t i, size_t size, stats& st)
 {
     size_t largest = i;
     size_t left = 2 * i + 1;
@@ -342,7 +146,8 @@ void generate_heap(vector<int>& arr, size_t i, size_t size, stats& st)
     }
 }
 
-stats heap_sort(vector<int>& arr)
+template <typename T>
+stats heap_sort(T& arr)
 {
     stats st;
     for (int i = arr.size() / 2 - 1; i >= 0; i--)
@@ -355,6 +160,51 @@ stats heap_sort(vector<int>& arr)
         swap(arr[0], arr[i]);
         st.copy_count++;
         generate_heap(arr, 0, i, st);
+    }
+    return st;
+}
+
+stats bubble_sort_iter(vector<int>::iterator& begin, vector<int>::iterator& end)
+{
+    stats st;
+    for (auto i = begin; i != end - 1; ++i)
+    {
+        bool flag = true;
+        for (auto j = begin; j != end - 1; ++j)
+        {
+            st.comparison_count++;
+            if (*j > *(j + 1))
+            {
+                flag = false;
+                swap(*j, *(j + 1));
+                st.copy_count++;
+            }
+        }
+        if (flag) break;
+    }
+    return st;
+}
+
+stats shell_sort_iter(vector<int>::iterator begin, vector<int>::iterator end)
+{
+    stats st;
+    size_t size = distance(begin, end);
+    for (int gap = size / 2; gap > 0; gap /= 2)
+    {
+        for (int i = gap; i < size; i++)
+        {
+            auto tmp = *(begin + i);
+            st.copy_count++;
+            int j;
+            st.comparison_count++;
+            for (j = i; j >= gap && *(begin + j - gap) > tmp; j -= gap)
+            {
+                st.comparison_count++;
+                *(begin + j) = *(begin + j - gap);
+                st.copy_count++;
+            }
+            *(begin + j) = tmp;
+        }
     }
     return st;
 }
@@ -444,16 +294,19 @@ int main()
  //   cout << endl << endl;
 
     string str = "fedcba";
+    cout << str << " ";
     stats s;
     s = bubble_sort(str);
     cout << "Bubble sort: " << str << endl;
 
     string str1 = "fedcba";
+    cout << str1 << " ";
     stats s1;
     s1 = shell_sort(str1);
     cout << "Shell sort: " << str1 << endl;
 
     string str2 = "fedcba";
+    cout << str2 << " ";
     stats s2;
     s2 = heap_sort(str2);
     cout << "Heap sort: " << str2 << endl << endl;
@@ -496,9 +349,9 @@ int main()
     students.add(name, last_name, a);
 
     cout << students << endl << endl;
-    //students.bubble_sort();
-    //students.shell_sort();
-    students.heap_sort();
+    //bubble_sort(students);
+    //shell_sort(students);
+    heap_sort(students);
     cout << students << endl << endl;
 
 	return 0;
